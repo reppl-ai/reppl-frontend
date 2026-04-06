@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import WaitlistForm from "../components/WaitlistForm";
 
 export default function LandingPage() {
   return (
@@ -146,7 +147,13 @@ YOU ABSORB LOST DEMAND TODAY.
         </section>
 
         <section className="mx-auto max-w-[1400px] px-4 py-8 md:px-8 md:py-12">
-          <div className="reveal terminal-panel p-6 text-center md:p-10" style={{ animationDelay: "400ms" }}>
+          <div className="reveal" style={{ animationDelay: "400ms" }}>
+            <WaitlistForm />
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-[1400px] border-t border-[var(--ink)] px-4 py-8 md:px-8 md:py-12">
+          <div className="reveal terminal-panel p-6 text-center md:p-10" style={{ animationDelay: "460ms" }}>
             <div className="terminal-label">[STOP THE LEAK]</div>
             <div className="mt-6 font-display text-5xl uppercase md:text-6xl">STOP PAYING FOR DELAY.</div>
             <div className="mx-auto mt-6 max-w-3xl text-sm uppercase leading-8 text-[var(--ink-mid)]">
