@@ -10,6 +10,7 @@ import { useDashboard } from "../hooks/useDashboard";
 
 export default function OnboardPage() {
   const router = useRouter();
+  const initialFounderEmail = typeof router.query.email === "string" ? router.query.email : "";
   const [analysis, setAnalysis] = useState<AnalyzeProductResponse | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +46,14 @@ export default function OnboardPage() {
         <meta content="Stop finding out too late." name="description" />
       </Head>
       <main className="page-shell flex min-h-screen items-center justify-center px-4 py-10">
-        {!analysis ? <MissionForm error={error} loading={submitting} onSubmit={handleSubmit} /> : null}
+        {!analysis ? (
+          <MissionForm
+            error={error}
+            initialFounderEmail={initialFounderEmail}
+            loading={submitting}
+            onSubmit={handleSubmit}
+          />
+        ) : null}
         {analysis && !ready ? <PipelineTracker dashboard={data} /> : null}
         {ready ? (
           <section className="terminal-panel mx-auto max-w-3xl p-10 text-center">

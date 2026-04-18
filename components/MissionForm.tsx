@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import type { AnalyzeProductPayload } from "../lib/types";
 
@@ -6,17 +6,23 @@ interface MissionFormProps {
   onSubmit: (payload: AnalyzeProductPayload) => Promise<void>;
   loading: boolean;
   error: string | null;
+  initialFounderEmail?: string;
 }
 
-export function MissionForm({ onSubmit, loading, error }: MissionFormProps) {
+export function MissionForm({ onSubmit, loading, error, initialFounderEmail = "" }: MissionFormProps) {
   const fallbackTimezone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York",
     []
   );
   const [productUrl, setProductUrl] = useState("");
-  const [founderEmail, setFounderEmail] = useState("");
+  const [founderEmail, setFounderEmail] = useState(initialFounderEmail);
   const [slackWebhookUrl, setSlackWebhookUrl] = useState("");
   const [timezone, setTimezone] = useState(fallbackTimezone);
+
+  useEffect(() => {
+    if (!initialFounderEmail) return;
+    setFounderEmail(initialFounderEmail);
+  }, [initialFounderEmail]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
