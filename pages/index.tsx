@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 export default function LandingPage() {
@@ -127,57 +128,93 @@ TEAM ONE CLEAN THING TO RESPOND WITH.
                 EARLY ACCESS FOR THE FIRST FOUNDER BATCH.
               </div>
             </div>
+            <div className="grid gap-0">
+              <div className="grid gap-0 md:grid-cols-2">
+                <StepCard
+                  index="01"
+                  text="PASTE YOUR PRODUCT URL. REPPL WATCHES THE BRANDS THAT CAN TAKE DEMAND FROM YOU."
+                />
+                <StepCard
+                  index="02"
+                  text="WHEN THEY CUT PRICE, PUSH A BUNDLE, OR SHIFT STOCK, YOU SEE IT BEFORE THE DAY GETS AWAY FROM YOU."
+                />
+                <StepCard
+                  index="03"
+                  text="EACH MOVE IS TIED TO THE LIKELY HIT: LOST DEMAND, PRICE PRESSURE, OR MARGIN EROSION."
+                />
+                <StepCard
+                  index="04"
+                  text="BY 09:00, YOU GET ONE CLEAR CALL SO YOU ACT EARLY INSTEAD OF READING A BAD SALES REPORT LATER."
+                />
+              </div>
 
-            <div className="p-6 md:p-10">
-              <form className="soft-panel p-6 md:p-8" onSubmit={handleWaitlistSubmit}>
+              <form
+                className="border-t border-[var(--ink)] p-6 md:p-8"
+                onSubmit={handleWaitlistSubmit}
+              >
                 <div className="terminal-label">[Request access]</div>
-                <div className="mt-4 max-w-lg text-sm uppercase leading-8 text-[var(--ink-mid)]">
-                  Start with your work email. We will reach out when the next cohort opens.
-                </div>
-
-                <div className="mt-6">
-                  <label className="terminal-label" htmlFor="waitlist-email">
-                    [Business email]
-                  </label>
+                <div className="mt-5 grid gap-4">
                   <input
-                    className="waitlist-input mt-3"
-                    id="waitlist-email"
+                    className="waitlist-input"
                     onChange={(event) => setWaitlistEmail(event.target.value)}
-                    placeholder="founder@brand.com"
+                    placeholder="WORK EMAIL"
                     type="email"
                     value={waitlistEmail}
                   />
-                </div>
-
-                <div className="mt-5">
-                  <label className="terminal-label" htmlFor="waitlist-category">
-                    [D2C category]
-                  </label>
                   <select
-                    className="waitlist-input mt-3"
-                    id="waitlist-category"
+                    className="waitlist-input"
                     onChange={(event) => setWaitlistCategory(event.target.value)}
                     value={waitlistCategory}
                   >
-                    <option value="">Select category</option>
+                    <option value="">SELECT D2C CATEGORY</option>
                     {D2C_CATEGORIES.map((category) => (
                       <option key={category} value={category}>
-                        {category}
+                        {category.toUpperCase()}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                <button className="terminal-button solid mt-5 w-full justify-center" type="submit">
-                  {"[Apply for Early Access >>>]"}
-                </button>
+                {waitlistError ? (
+                  <div className="mt-4 border border-[var(--ink)] bg-[rgba(180,104,68,0.12)] px-4 py-3 text-xs uppercase text-[var(--ink)]">
+                    [{waitlistError}]
+                  </div>
+                ) : null}
 
-                <div className="mt-4 text-xs uppercase leading-6 text-[var(--ink-muted)]">
-                  Early access invites, preview notes, and product updates. No spam.
+                {waitlistSuccess ? (
+                  <div className="mt-4 border border-[var(--ink)] bg-[rgba(102,116,94,0.12)] px-4 py-3 text-xs uppercase text-[var(--ink)]">
+                    [{waitlistSuccess}]
+                  </div>
+                ) : null}
+
+                <div className="mt-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="text-xs uppercase text-[var(--ink-muted)]">
+                    Work email and category help us shape the founder batch.
+                  </div>
+                  <button className="terminal-button" type="submit">
+                    {"[REQUEST SPOT >>>]"}
+                  </button>
                 </div>
-                {waitlistError ? <div className="mt-3 text-xs uppercase">{waitlistError}</div> : null}
-                {waitlistSuccess ? <div className="mt-3 text-xs uppercase text-[var(--ink-mid)]">{waitlistSuccess}</div> : null}
               </form>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-[1400px] px-4 py-8 md:px-8 md:py-12">
+          <div className="reveal terminal-panel p-6 text-center md:p-10" style={{ animationDelay: "400ms" }}>
+            <div className="terminal-label">[STOP THE LEAK]</div>
+            <div className="mt-6 font-display text-5xl uppercase md:text-6xl">STOP PAYING FOR DELAY.</div>
+            <div className="mx-auto mt-6 max-w-3xl text-sm uppercase leading-8 text-[var(--ink-mid)]">
+              IF YOU FIND OUT TOMORROW, TODAY'S REVENUE IS ALREADY GONE.
+              REPPL SHOWS YOU WHAT CHANGED, WHAT IT LIKELY COST, AND THE NEXT MOVE TO MAKE.
+            </div>
+            <div className="mt-8 flex flex-col justify-center gap-4 md:flex-row">
+              <Link className="terminal-button" href="/onboard">
+                {"[START DAILY BRIEF >>>]"}
+              </Link>
+              <Link className="terminal-button" href="/dashboard">
+                {"[SEE SAMPLE INTELLIGENCE >>>]"}
+              </Link>
             </div>
           </div>
         </section>
@@ -191,6 +228,15 @@ function StatBlock({ label, value }: { label: string; value: string }) {
     <div className="border-b border-[var(--ink)] px-4 py-5 text-left text-xs uppercase last:border-b-0 md:border-b-0 md:border-r last:md:border-r-0">
       <div className="text-[var(--ink-muted)]">{label}</div>
       <div className="mt-3 font-display text-3xl">{value}</div>
+    </div>
+  );
+}
+
+function StepCard({ index, text }: { index: string; text: string }) {
+  return (
+    <div className="border-b border-[var(--ink)] p-5 text-xs uppercase md:odd:border-r">
+      <div className="terminal-label text-[var(--ink-muted)]">[{index}]</div>
+      <div className="mt-4 leading-7 text-[var(--ink-mid)]">{text}</div>
     </div>
   );
 }
