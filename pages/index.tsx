@@ -1,5 +1,4 @@
 import Head from "next/head";
-import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 export default function LandingPage() {
@@ -200,24 +199,6 @@ TEAM ONE CLEAN THING TO RESPOND WITH.
           </div>
         </section>
 
-        <section className="mx-auto max-w-[1400px] px-4 py-8 md:px-8 md:py-12">
-          <div className="reveal terminal-panel p-6 text-center md:p-10" style={{ animationDelay: "400ms" }}>
-            <div className="terminal-label">[STOP THE LEAK]</div>
-            <div className="mt-6 font-display text-5xl uppercase md:text-6xl">STOP PAYING FOR DELAY.</div>
-            <div className="mx-auto mt-6 max-w-3xl text-sm uppercase leading-8 text-[var(--ink-mid)]">
-              IF YOU FIND OUT TOMORROW, TODAY'S REVENUE IS ALREADY GONE.
-              REPPL SHOWS YOU WHAT CHANGED, WHAT IT LIKELY COST, AND THE NEXT MOVE TO MAKE.
-            </div>
-            <div className="mt-8 flex flex-col justify-center gap-4 md:flex-row">
-              <Link className="terminal-button" href="/onboard">
-                {"[START DAILY BRIEF >>>]"}
-              </Link>
-              <Link className="terminal-button" href="/dashboard">
-                {"[SEE SAMPLE INTELLIGENCE >>>]"}
-              </Link>
-            </div>
-          </div>
-        </section>
       </main>
     </>
   );
