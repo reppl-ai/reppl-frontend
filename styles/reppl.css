@@ -1,0 +1,208 @@
+/* Reppl strict shell: paper + ink only, no shadow/gradient in scope */
+.reppl-shell {
+  --reppl-paper: #f5f4ef;
+  --reppl-ink: #0a0a0a;
+  min-height: 100vh;
+  background: var(--reppl-paper);
+  color: var(--reppl-ink);
+}
+
+.reppl-shell * {
+  box-shadow: none !important;
+}
+
+.reppl-card-dashed {
+  border: 1px dashed #0a0a0a;
+  background: transparent;
+}
+
+.reppl-border-solid {
+  border: 1px solid #0a0a0a;
+}
+
+.reppl-btn-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: 1px solid #0a0a0a;
+  background: #0a0a0a;
+  color: #f5f4ef;
+  padding: 0.85rem 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  cursor: crosshair;
+}
+
+.reppl-btn-solid:hover {
+  background: #f5f4ef;
+  color: #0a0a0a;
+}
+
+.reppl-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: 1px solid #0a0a0a;
+  background: transparent;
+  color: #0a0a0a;
+  padding: 0.85rem 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background-color 150ms ease, color 150ms ease;
+  cursor: crosshair;
+}
+
+.reppl-btn-outline:hover {
+  background: #0a0a0a;
+  color: #f5f4ef;
+}
+
+.reppl-input {
+  width: 100%;
+  border: 1px solid #0a0a0a;
+  background: transparent;
+  padding: 0.75rem 0.9rem;
+  color: #0a0a0a;
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.reppl-input::placeholder {
+  color: #7a7a7a;
+  text-transform: none;
+}
+
+.reppl-input:focus {
+  outline: none;
+}
+
+.reppl-label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a7a7a;
+}
+
+.reppl-muted {
+  color: #7a7a7a;
+}
+
+.reppl-canvas-bg {
+  background-color: #f5f4ef;
+  background-image: radial-gradient(circle, #d0cfc9 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.reppl-line {
+  transition: stroke-width 150ms ease;
+}
+
+.reppl-node {
+  width: 100%;
+  border: 1px solid #0a0a0a;
+  background: #f5f4ef;
+  transition: border-width 150ms ease;
+}
+
+.reppl-node:hover {
+  border-width: 2px;
+}
+
+.reppl-node-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #0a0a0a;
+  background: #0a0a0a;
+  color: #f5f4ef;
+  padding: 0.5rem 0.6rem;
+  min-height: 2.5rem;
+  user-select: none;
+}
+
+.reppl-node-hdr .grab:hover {
+  cursor: grab;
+}
+
+.reppl-node-body {
+  padding: 0.65rem 0.6rem;
+  background: #f5f4ef;
+  color: #0a0a0a;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.reppl-expand-btm {
+  border-top: 1px dashed #0a0a0a;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 200ms ease, opacity 150ms ease 0ms;
+}
+
+.reppl-expand-btm.reppl-open {
+  max-height: 2000px;
+  opacity: 1;
+  transition: max-height 200ms ease, opacity 150ms ease 75ms;
+}
+
+.reppl-node-content {
+  animation: reppl-content-in 250ms ease-out 120ms both;
+}
+
+@keyframes reppl-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reppl-flow-line path {
+  stroke-dasharray: 900;
+  stroke-dashoffset: 900;
+  animation: reppl-line-draw 400ms ease-out forwards;
+}
+
+@keyframes reppl-line-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.reppl-pulse {
+  animation: reppl-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes reppl-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.reppl-minimap {
+  width: 120px;
+  height: 80px;
+  border: 1px dashed #0a0a0a;
+  background: #f5f4ef;
+}
+
+/* Mobile: stack, no pan hint */
+@media (max-width: 767px) {
+  .reppl-canvas-wrap-mobile {
+    overflow: visible;
+  }
+}

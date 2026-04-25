@@ -101,7 +101,7 @@ export default function SignupPage() {
       }
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      router.push("/dashboard");
+      router.push("/companies");
     } catch {
       setApiError("NETWORK ERROR. CHECK YOUR CONNECTION.");
     } finally {
