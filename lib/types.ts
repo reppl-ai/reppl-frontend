@@ -3,6 +3,7 @@ export type SignalSeverity = "high" | "medium" | "low";
 export type OpportunityUrgency = "immediate" | "this_week" | "next_month";
 
 export interface AnalyzeProductPayload {
+  company_id: string;
   product_url: string;
   founder_email?: string;
   slack_webhook_url?: string;

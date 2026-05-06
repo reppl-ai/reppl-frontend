@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { MissionForm } from "../components/MissionForm";
 import { PipelineTracker } from "../components/PipelineTracker";
-import { analyzeProduct } from "../lib/api";
+import { analyzeProduct, listCompanies } from "../lib/api";
 import type { AnalyzeProductPayload, AnalyzeProductResponse } from "../lib/types";
 import { useDashboard } from "../hooks/useDashboard";
 
@@ -15,11 +15,33 @@ import { useDashboard } from "../hooks/useDashboard";
 export default function DeployPage() {
   const router = useRouter();
   const initialFounderEmail = typeof router.query.email === "string" ? router.query.email : "";
+  const queryCompanyId = typeof router.query.company_id === "string" ? router.query.company_id : "";
+  const [companyId, setCompanyId] = useState("");
   const [analysis, setAnalysis] = useState<AnalyzeProductResponse | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const { data } = useDashboard(analysis?.product_id ?? null);
+
+  useEffect(() => {
+    if (queryCompanyId) {
+      setCompanyId(queryCompanyId);
+      return;
+    }
+    let active = true;
+    async function loadDefaultCompany() {
+      try {
+        const companies = await listCompanies();
+        if (active) setCompanyId(companies[0]?.id ?? "");
+      } catch {
+        if (active) setCompanyId("");
+      }
+    }
+    void loadDefaultCompany();
+    return () => {
+      active = false;
+    };
+  }, [queryCompanyId]);
 
   useEffect(() => {
     if (!analysis?.product_id || !data?.brief || data.is_processing || ready) return;
@@ -52,6 +74,7 @@ export default function DeployPage() {
       <main className="page-shell flex min-h-screen items-center justify-center px-4 py-10">
         {!analysis ? (
           <MissionForm
+            companyId={companyId}
             error={error}
             initialFounderEmail={initialFounderEmail}
             loading={submitting}

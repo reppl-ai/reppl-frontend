@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState, FormEvent } from "react";
 
+import { login } from "../lib/api";
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -27,16 +29,7 @@ export default function LoginPage() {
     setErrors({});
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setApiError(data.detail ?? "LOGIN FAILED. TRY AGAIN.");
-        return;
-      }
+      const data = await login({ email, password });
       if (typeof data.access_token !== "string" || !data.access_token) {
         setApiError("UNEXPECTED SERVER RESPONSE. TRY AGAIN.");
         return;
@@ -44,8 +37,8 @@ export default function LoginPage() {
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
       router.push("/companies");
-    } catch {
-      setApiError("NETWORK ERROR. CHECK YOUR CONNECTION.");
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message.toUpperCase() : "NETWORK ERROR. CHECK YOUR CONNECTION.");
     } finally {
       setLoading(false);
     }

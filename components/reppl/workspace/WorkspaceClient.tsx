@@ -3,9 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 import { useMediaQuery } from "../../../hooks/useMediaQuery";
+import { getCompany, loadCompanyWorkspace, patchCompany, saveCompanyWorkspace } from "../../../lib/api";
 import { MOCK_ANALYSIS, MOCK_COMPETITORS } from "../../../lib/reppl/mockData";
-import { getCompany, updateCompany } from "../../../lib/reppl/storage";
-import type { RepplCompany, RepplModuleId, RepplNodePosition } from "../../../lib/reppl/types";
+import type { RepplCompany, RepplModuleId, RepplNodePosition, RepplWorkspaceState } from "../../../lib/reppl/types";
 import { ProductIntelligencePanel } from "./ProductIntelligencePanel";
 
 const MOBILE_ORDER: RepplModuleId[] = ["decision", "marketSignals", "competitors", "aiSearch", "actionable", "signal"];
@@ -55,6 +55,7 @@ export function WorkspaceClient({ companyId }: Props) {
   const [shopify, setShopify] = useState(true);
   const [productOpen, setProductOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
+  const [workspaceLoaded, setWorkspaceLoaded] = useState(false);
   const [expanded, setExpanded] = useState<Record<RepplModuleId, boolean>>({
     decision: true,
     competitors: false,
@@ -79,9 +80,44 @@ export function WorkspaceClient({ companyId }: Props) {
   const updateTimer = useRef<number | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    setCompany(getCompany(companyId) ?? null);
+    let active = true;
+    async function load() {
+      setCompany(undefined);
+      setWorkspaceLoaded(false);
+      try {
+        const [nextCompany, workspace] = await Promise.all([
+          getCompany(companyId),
+          loadCompanyWorkspace(companyId),
+        ]);
+        if (!active) return;
+        setCompany(nextCompany);
+        setPositions(mergePositions(workspace));
+        setExpanded((current) => ({ ...current, ...workspace.expanded }));
+        setWorkspaceLoaded(true);
+      } catch {
+        if (active) {
+          setCompany(null);
+          setWorkspaceLoaded(true);
+        }
+      }
+    }
+    void load();
+    return () => {
+      active = false;
+    };
   }, [companyId]);
+
+  useEffect(() => {
+    if (!workspaceLoaded || !company) return;
+    const timer = window.setTimeout(() => {
+      void saveCompanyWorkspace(companyId, {
+        positions,
+        connections: [],
+        expanded,
+      });
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [companyId, company, expanded, positions, workspaceLoaded]);
 
   useEffect(() => {
     if (typeof window === "undefined" || isMobile) return;
@@ -120,8 +156,7 @@ export function WorkspaceClient({ companyId }: Props) {
     updateTimer.current = window.setTimeout(() => {
       setAnalyzing(false);
       setUpdated(null);
-      updateCompany(companyId, { lastAnalysisAt: new Date().toISOString() });
-      setCompany(getCompany(companyId) ?? null);
+      void patchCompany(companyId, { lastAnalysisAt: new Date().toISOString() }).then(setCompany).catch(() => {});
     }, sequence.length * 650 + 2500);
   }, [companyId]);
 
@@ -717,6 +752,13 @@ function statusOverride(id: RepplModuleId, updating: RepplModuleId | null, updat
   if (updating === id) return "[UPDATING >>>]";
   if (updated === id) return "[UPDATED ✦]";
   return null;
+}
+
+function mergePositions(workspace: RepplWorkspaceState): Record<RepplModuleId, RepplNodePosition> {
+  return {
+    ...defaultPositions(),
+    ...(workspace.positions ?? {}),
+  };
 }
 
 function collapsedStatus(id: RepplModuleId, company: RepplCompany, shopifyConnected: boolean) {

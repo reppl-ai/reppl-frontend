@@ -6,10 +6,11 @@ interface MissionFormProps {
   onSubmit: (payload: AnalyzeProductPayload) => Promise<void>;
   loading: boolean;
   error: string | null;
+  companyId: string;
   initialFounderEmail?: string;
 }
 
-export function MissionForm({ onSubmit, loading, error, initialFounderEmail = "" }: MissionFormProps) {
+export function MissionForm({ onSubmit, loading, error, companyId, initialFounderEmail = "" }: MissionFormProps) {
   const fallbackTimezone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York",
     []
@@ -27,6 +28,7 @@ export function MissionForm({ onSubmit, loading, error, initialFounderEmail = ""
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await onSubmit({
+      company_id: companyId,
       product_url: productUrl,
       founder_email: founderEmail || undefined,
       slack_webhook_url: slackWebhookUrl || undefined,
@@ -66,7 +68,7 @@ export function MissionForm({ onSubmit, loading, error, initialFounderEmail = ""
         </label>
       </div>
       <div className="mt-8 flex flex-col gap-4">
-        <button className="terminal-button" disabled={loading || !productUrl || !founderEmail} type="submit">
+        <button className="terminal-button" disabled={loading || !productUrl || !founderEmail || !companyId} type="submit">
           {loading ? "[DEPLOYING AGENTS...]" : "[DEPLOY AGENTS >>>]"}
         </button>
         <div className="text-xs uppercase text-[var(--ink-muted)]">NO CREDIT CARD // 14-DAY FREE TRIAL</div>

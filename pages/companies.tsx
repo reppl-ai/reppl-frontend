@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useEffect, useState } from "react";
 
-import { addCompany, loadCompanies } from "../lib/reppl/storage";
+import { createCompany, listCompanies } from "../lib/api";
 import type { RepplCompany, RepplSector } from "../lib/reppl/types";
 import { REPPL_SECTORS } from "../lib/reppl/types";
 
@@ -14,9 +14,27 @@ export default function CompanySelectionPage() {
   const [name, setName] = useState("");
   const [website, setWebsite] = useState("");
   const [sector, setSector] = useState<RepplSector | "">("");
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState("");
 
   useEffect(() => {
-    setList(loadCompanies());
+    let active = true;
+    async function load() {
+      setLoading(true);
+      setApiError("");
+      try {
+        const companies = await listCompanies();
+        if (active) setList(companies);
+      } catch (error) {
+        if (active) setApiError(error instanceof Error ? error.message : "Could not load companies");
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    void load();
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
@@ -37,7 +55,13 @@ export default function CompanySelectionPage() {
         </header>
 
         <main className="mx-auto max-w-6xl px-4 py-10 md:px-8">
-          {list.length === 0 ? (
+          {apiError ? (
+            <div className="reppl-card-dashed mx-auto max-w-xl p-6 text-center font-mono text-xs uppercase">
+              [{apiError}] // <Link className="underline" href="/login">[LOGIN]</Link>
+            </div>
+          ) : loading ? (
+            <div className="py-20 text-center font-mono text-sm tracking-[0.12em]">[LOADING COMPANIES...]</div>
+          ) : list.length === 0 ? (
             <div className="py-20 text-center">
               <p className="font-mono text-sm tracking-[0.12em]">✦ NO COMPANIES YET</p>
               <p className="mt-3 font-mono text-xs text-[#7A7A7A]">{"..........................................."}</p>
@@ -94,22 +118,24 @@ export default function CompanySelectionPage() {
               className="mb-8 w-full max-w-[480px] border border-[#0A0A0A] bg-[#F5F4EF] p-6"
               style={{ animation: "companySetupIn 300ms ease forwards" }}
               onClick={(event) => event.stopPropagation()}
-              onSubmit={(event: FormEvent) => {
+              onSubmit={async (event: FormEvent) => {
                 event.preventDefault();
                 if (!name.trim() || !website.trim() || !sector) return;
-                const id = `c_${Date.now().toString(36)}`;
-                addCompany({
-                  id,
+                setApiError("");
+                try {
+                  const company = await createCompany({
                   name: name.trim(),
                   website: website.replace(/^https?:\/\//i, "").replace(/\/$/, ""),
                   sector,
                   tags: [],
                   description: "",
-                  lastAnalysisAt: null,
-                  createdAt: new Date().toISOString(),
                 });
-                setModalOpen(false);
-                void router.push(`/workspace/${id}`);
+                  setList((current) => [company, ...current]);
+                  setModalOpen(false);
+                  void router.push(`/workspace/${company.id}`);
+                } catch (error) {
+                  setApiError(error instanceof Error ? error.message : "Company could not be created");
+                }
               }}
             >
               <style>{`@keyframes companySetupIn{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>

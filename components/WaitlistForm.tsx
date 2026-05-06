@@ -1,5 +1,7 @@
 import { useState, FormEvent } from "react";
 
+import { joinWaitlist } from "../lib/api";
+
 interface WaitlistFormData {
   email: string;
   companyName: string;
@@ -28,19 +30,7 @@ export default function WaitlistForm() {
     setErrorMessage("");
 
     try {
-      // TODO: Replace with your actual API endpoint
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/waitlist`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit. Please try again.");
-      }
-
+      await joinWaitlist(formData);
       setStatus("success");
       setFormData({
         email: "",

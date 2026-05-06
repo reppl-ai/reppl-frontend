@@ -3,8 +3,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useMemo, useState } from "react";
 
-import { addCompany } from "../lib/reppl/storage";
-import type { RepplCompany, RepplSector, RepplTag } from "../lib/reppl/types";
+import { createCompany } from "../lib/api";
+import type { RepplSector, RepplTag } from "../lib/reppl/types";
 import { REPPL_SECTORS, REPPL_TAG_OPTIONS } from "../lib/reppl/types";
 
 export default function MissionSetupPage() {
@@ -16,6 +16,8 @@ export default function MissionSetupPage() {
   const [d1, setD1] = useState("");
   const [d2, setD2] = useState("");
   const [d3, setD3] = useState("");
+  const [apiError, setApiError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const canSubmit = useMemo(
     () => name.trim() && website.trim() && sector,
@@ -26,22 +28,25 @@ export default function MissionSetupPage() {
     setTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!canSubmit || !sector) return;
-    const id = `c_${Date.now().toString(36)}`;
-    const company: RepplCompany = {
-      id,
-      name: name.trim(),
-      website: website.replace(/^https?:\/\//i, "").replace(/\/$/, ""),
-      sector,
-      tags: [...tags],
-      description: [d1, d2, d3].filter(Boolean).join("\n"),
-      lastAnalysisAt: null,
-      createdAt: new Date().toISOString(),
-    };
-    addCompany(company);
-    void router.push("/companies");
+    setLoading(true);
+    setApiError("");
+    try {
+      await createCompany({
+        name: name.trim(),
+        website: website.replace(/^https?:\/\//i, "").replace(/\/$/, ""),
+        sector,
+        tags: [...tags],
+        description: [d1, d2, d3].filter(Boolean).join("\n"),
+      });
+      void router.push("/companies");
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message : "Company could not be created");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -117,10 +122,11 @@ export default function MissionSetupPage() {
               <button
                 className="reppl-btn-solid mt-2 w-full"
                 type="submit"
-                disabled={!canSubmit}
+                disabled={!canSubmit || loading}
               >
-                [ADD COMPANY &gt;&gt;&gt;]
+                {loading ? "[ADDING COMPANY...]" : "[ADD COMPANY >>>]"}
               </button>
+              {apiError ? <p className="font-mono text-[0.65rem] uppercase text-[#0A0A0A]">[{apiError}]</p> : null}
             </form>
             <p className="mt-6 text-center font-mono text-[0.65rem] text-[#7A7A7A]">
               <Link className="text-[#0A0A0A] underline" href="/">

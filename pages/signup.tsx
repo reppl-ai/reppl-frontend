@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState, FormEvent } from "react";
 
+import { signup } from "../lib/api";
+
 const TIMEZONES = [
   "Asia/Kolkata",
   "Asia/Mumbai",
@@ -35,6 +37,7 @@ interface FieldErrors {
   password?: string;
   name?: string;
   brand_name?: string;
+  timezone?: string;
 }
 
 export default function SignupPage() {
@@ -66,7 +69,7 @@ export default function SignupPage() {
     else if (fields.password.length < 8) e.password = "MIN 8 CHARACTERS";
     if (!fields.name.trim()) e.name = "YOUR NAME IS REQUIRED";
     if (!fields.brand_name.trim()) e.brand_name = "BRAND NAME IS REQUIRED";
-    if (!TIMEZONES.includes(fields.timezone)) e.email = "INVALID TIMEZONE";
+    if (!TIMEZONES.includes(fields.timezone)) e.timezone = "INVALID TIMEZONE";
     return e;
   }
 
@@ -78,23 +81,14 @@ export default function SignupPage() {
     setErrors({});
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: fields.email,
-          password: fields.password,
-          name: fields.name,
-          brand_name: fields.brand_name,
-          timezone: fields.timezone,
-          brief_time: /^\d{2}:\d{2}$/.test(fields.brief_time) ? fields.brief_time + ":00" : fields.brief_time,
-        }),
+      const data = await signup({
+        email: fields.email,
+        password: fields.password,
+        name: fields.name,
+        brand_name: fields.brand_name,
+        timezone: fields.timezone,
+        brief_time: /^\d{2}:\d{2}$/.test(fields.brief_time) ? fields.brief_time + ":00" : fields.brief_time,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setApiError(data.detail ?? "SIGNUP FAILED. TRY AGAIN.");
-        return;
-      }
       if (typeof data.access_token !== "string" || !data.access_token) {
         setApiError("UNEXPECTED SERVER RESPONSE. TRY AGAIN.");
         return;
@@ -102,8 +96,8 @@ export default function SignupPage() {
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user", JSON.stringify(data.user));
       router.push("/companies");
-    } catch {
-      setApiError("NETWORK ERROR. CHECK YOUR CONNECTION.");
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message.toUpperCase() : "NETWORK ERROR. CHECK YOUR CONNECTION.");
     } finally {
       setLoading(false);
     }
@@ -204,6 +198,7 @@ export default function SignupPage() {
                           <option key={tz} value={tz}>{tz.replace(/_/g, " ").toUpperCase()}</option>
                         ))}
                       </select>
+                      {errors.timezone && <div className="mt-1 text-xs text-[var(--ink-mid)]">// {errors.timezone}</div>}
                     </label>
 
                     <label className="terminal-field text-xs uppercase">
